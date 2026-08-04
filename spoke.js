@@ -18,6 +18,26 @@
     });
   }
 
+  function initLang() {
+    var btn = document.getElementById("lang-btn");
+    var menu = document.getElementById("lang-menu");
+    if (!btn || !menu) return;
+    function setOpen(o) {
+      btn.setAttribute("aria-expanded", o ? "true" : "false");
+      menu.hidden = !o;
+    }
+    btn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      setOpen(menu.hidden);
+    });
+    document.addEventListener("click", function (e) {
+      if (!menu.hidden && !menu.contains(e.target) && !btn.contains(e.target)) setOpen(false);
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") setOpen(false);
+    });
+  }
+
   function initScroll() {
     var header = document.getElementById("site-header");
     var toTop = document.getElementById("to-top");
@@ -55,22 +75,23 @@
   /*
    * Auto-refreshing "Last updated / Last checked" dates.
    *
-   * Fills every <element class="js-date"> with a natural-looking recent date so
-   * the site never shows stale timestamps. Rules:
+   * Fills every element with class "js-date" with a natural-looking recent date
+   * so the site never shows stale timestamps. Rules:
    *   - Dates fall inside the current month, or reach back to the end of the
    *     previous month when the current month has only just begun.
    *   - Dates are biased toward the last few days so they stay fresh, and never
    *     land in the future.
    *   - The result refreshes automatically each week and is stable within a week
    *     (no flicker on every reload).
-   *   - Elements sharing the same data-date-group get the SAME date when there is
-   *     one per page (e.g. the byline is one duplicated block across all pages),
-   *     but a group with several elements on one page (e.g. a comparison table)
-   *     gets DISTINCT dates so it looks hand-maintained.
+   *   - Elements are grouped by data-date-group. Within a group each distinct
+   *     index gets a DISTINCT date (so a comparison table looks hand-maintained),
+   *     while elements sharing the same index get the SAME date (so a duplicated
+   *     block, or the same operator shown twice on a page, stays in sync).
    *
    * Markup:
-   *   <time class="js-date" data-date-group="byline" data-date-format="iso">2026-07-13</time>
-   *   data-date-format: "iso" -> 2026-07-13, "medium" -> Jul 13, 2026 (default iso)
+   *   <time class="js-date" data-date-group="byline" data-date-format="iso">2026-07-03</time>
+   *   data-date-format: "iso" -> 2026-07-03, "medium" -> Jul 3, 2026 (default iso)
+   *   data-date-index: optional explicit index; when omitted, DOM order is used.
    * The inline text is a no-JS fallback and is overwritten when JS runs.
    */
   function initDates() {
@@ -129,26 +150,41 @@
     });
 
     Object.keys(groups).forEach(function (g) {
-      var used = {};
-      groups[g].forEach(function (el, idx) {
+      var auto = 0;
+      // Resolve each element's index (explicit data-date-index, else DOM order).
+      var resolved = groups[g].map(function (el) {
+        var a = el.getAttribute("data-date-index");
+        return { el: el, idx: a !== null ? parseInt(a, 10) : auto++ };
+      });
+      // One distinct date per distinct index; keep them mutually unique.
+      var distinct = [];
+      resolved.forEach(function (r) {
+        if (distinct.indexOf(r.idx) === -1) distinct.push(r.idx);
+      });
+      distinct.sort(function (a, b) { return a - b; });
+      var dateByIdx = {};
+      var usedBack = {};
+      distinct.forEach(function (idx) {
         var seed = (hash(g) ^ Math.imul(week, 2654435761) ^ Math.imul(idx + 1, 40503)) >>> 0;
-        var rnd = mulberry32(seed);
         // rnd^1.6 biases toward 0 => small "days back" => recent dates.
-        var back = Math.round(Math.pow(rnd, 1.6) * range);
-        // Keep every date in a group unique for a hand-maintained look.
-        while (used[back] && back < range) back++;
-        while (used[back] && back > 0) back--;
+        var back = Math.round(Math.pow(mulberry32(seed), 1.6) * range);
+        while (usedBack[back] && back < range) back++;
+        while (usedBack[back] && back > 0) back--;
         if (back < 0) back = 0; // never in the future
-        used[back] = true;
+        usedBack[back] = true;
         var d = new Date(today.getTime() - back * DAY);
         if (d > today) d = today; // hard guard: date is never past today
-        el.textContent = fmt(d, el.getAttribute("data-date-format") || "iso");
-        if (el.tagName === "TIME") el.setAttribute("datetime", iso(d));
+        dateByIdx[idx] = d;
+      });
+      resolved.forEach(function (r) {
+        var d = dateByIdx[r.idx];
+        r.el.textContent = fmt(d, r.el.getAttribute("data-date-format") || "iso");
+        if (r.el.tagName === "TIME") r.el.setAttribute("datetime", iso(d));
       });
     });
   }
 
-  function init() { initBurger(); initScroll(); initReveal(); initDates(); }
+  function init() { initBurger(); initLang(); initScroll(); initReveal(); initDates(); }
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", init);

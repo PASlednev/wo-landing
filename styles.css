@@ -142,10 +142,25 @@ iframe { border: 0; }
   clip-path: polygon(20px 0%, 100% 0%, calc(100% - 20px) 100%, 0% 100%);
   box-shadow: 0 0 60px rgba(240,180,41,0.3);
 }
+/* Same hover as .btn--play: brighten the fill and lift slightly, nothing else. */
 .btn--final:hover {
   background: var(--lime-hover);
-  box-shadow: 0 0 80px rgba(240,180,41,0.5);
-  transform: translateY(-3px) scale(1.02);
+  transform: translateY(-1px);
+}
+
+/* The prose link rules (.spoke-body a, .rg-box a) are more specific than .btn,
+   so they used to repaint button labels: green-on-gold at rest and
+   lime-on-lime — i.e. invisible — on hover. Buttons keep their own colours. */
+.spoke-body a.btn,
+.rg-box a.btn,
+.spoke-body a.btn:hover,
+.rg-box a.btn:hover {
+  color: var(--bg);
+  text-decoration: none;
+}
+.spoke-body a.btn--demo,
+.spoke-body a.btn--demo:hover {
+  color: var(--lime);
 }
 
 /* ─── Navigation ───────────────────────────────────────────────────────── */
@@ -186,65 +201,70 @@ iframe { border: 0; }
 .nav__actions { display: flex; align-items: center; gap: 0.75rem; }
 .nav__cta { display: none; }
 
-/* Language switcher */
+/* ─── Language switcher ────────────────────────────────────────────────── */
 .lang { position: relative; }
-.lang__toggle {
-  display: flex;
+.lang__btn {
+  display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.375rem 0.75rem;
-  font-family: var(--f-mono);
-  font-size: 12px;
-  color: var(--muted);
-  border: 1px solid rgba(240,180,41,0.12);
-  background: transparent;
-  transition: all 0.2s ease;
+  gap: 0.35rem;
+  font-family: var(--f-body);
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text);
+  background: rgba(240,180,41,0.08);
+  border: 1px solid rgba(240,180,41,0.3);
+  border-radius: 6px;
+  padding: 0.45rem 0.6rem;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
 }
-.lang__toggle:hover,
-.lang.is-open .lang__toggle {
-  color: var(--lime);
-  border-color: rgba(240,180,41,0.4);
+.lang__btn:hover,
+.lang__btn[aria-expanded="true"] {
+  border-color: var(--lime);
+  background: rgba(240,180,41,0.14);
 }
-.lang.is-open .lang__toggle { background: rgba(240,180,41,0.05); }
-.lang__flag { font-size: 1rem; line-height: 1; }
-.lang__code { text-transform: uppercase; letter-spacing: 0.08em; display: none; }
-.lang__chevron { transition: transform 0.2s; }
-.lang.is-open .lang__chevron { transform: rotate(180deg); }
+.lang__caret { font-size: 0.6rem; opacity: 0.7; transition: transform 0.2s ease; }
+.lang__btn[aria-expanded="true"] .lang__caret { transform: rotate(180deg); }
 
 .lang__menu {
   position: absolute;
+  top: calc(100% + 0.4rem);
   right: 0;
-  top: 100%;
-  margin-top: 0.5rem;
-  z-index: 50;
-  padding: 0.25rem 0;
-  min-width: 160px;
+  min-width: 9rem;
   background: var(--panel);
-  border: 1px solid rgba(240,180,41,0.15);
-  box-shadow: 0 16px 40px rgba(0,0,0,0.6);
-  transform-origin: top;
+  border: 1px solid rgba(240,180,41,0.25);
+  border-radius: 8px;
+  padding: 0.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  z-index: 60;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.5);
   animation: menuIn 0.15s ease;
 }
+.lang__menu[hidden] { display: none; }
 @keyframes menuIn {
   from { opacity: 0; transform: translateY(-8px) scale(0.96); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
-.lang__menu li { display: block; }
-.lang__menu button {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.625rem 1rem;
-  text-align: left;
+.lang__menu a {
+  padding: 0.45rem 0.6rem;
+  border-radius: 6px;
   font-family: var(--f-body);
-  font-size: 13px;
+  font-size: 0.85rem;
+  font-weight: 600;
   color: var(--text);
-  transition: background 0.15s;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease;
 }
-.lang__menu button:hover { background: rgba(240,180,41,0.04); }
-.lang__menu button.is-current { color: var(--lime); background: rgba(240,180,41,0.06); }
-.lang__menu .check { margin-left: auto; font-size: 0.75rem; color: var(--lime); }
+.lang__menu a:hover { background: rgba(240,180,41,0.1); color: var(--lime); }
+.lang__menu a[aria-current="true"] { color: var(--bg); background: var(--lime); }
+
+/* The switcher is the only nav item that stays LTR-anchored on RTL pages. */
+[dir="rtl"] .lang__menu { right: auto; left: 0; text-align: right; }
 
 /* Burger */
 .burger { width: 1.5rem; display: flex; flex-direction: column; gap: 6px; }
@@ -1057,7 +1077,6 @@ a.footer__logo:focus-visible { opacity: 1; transform: translateY(-2px); }
 
 /* ─── Responsive ───────────────────────────────────────────────────────── */
 @media (min-width: 640px) {
-  .lang__code { display: inline; }
   .board__streak-h, .board__streak { display: flex; }
   .lb-cta { flex-direction: row; }
   .hero__cta-row { flex-direction: row; }
