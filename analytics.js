@@ -1,7 +1,7 @@
 (function () {
-  var GA_ID = 'G-XXXXXXXXXX';
+  var GA_ID = 'G-PL2FSNRKLV';
 
-  if (GA_ID.indexOf('G-') !== 0 || GA_ID === 'G-XXXXXXXXXX') return;
+  if (GA_ID.indexOf('G-') !== 0) return;
 
   var s = document.createElement('script');
   s.async = true;
