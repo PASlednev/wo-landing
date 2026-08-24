@@ -1,3 +1,6 @@
 .idea/
 .vscode/
 .DS_Store
+
+# Сборка статей: статик-токен Directus
+build/.env
