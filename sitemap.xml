@@ -94,7 +94,7 @@
   <!-- articles:start — генерируется build/build-articles.mjs, руками не править -->
   <url>
     <loc>https://wheeloutstrategy.com/articles/</loc>
-    <lastmod>2026-08-24</lastmod>
+    <lastmod>2026-08-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -106,7 +106,7 @@
   </url>
   <url>
     <loc>https://wheeloutstrategy.com/articles/wheel-out-volatility/</loc>
-    <lastmod>2026-08-24</lastmod>
+    <lastmod>2026-08-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
