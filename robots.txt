@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://wheeloutgame.com/sitemap.xml
+Sitemap: https://wheeloutstrategy.com/sitemap.xml
