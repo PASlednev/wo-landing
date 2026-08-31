@@ -91,7 +91,7 @@
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
-  <!-- articles:start — генерируется build/build-articles.mjs, руками не править -->
+  <!-- articles:start — генерируется сборщиком статей, руками не править -->
   <url>
     <loc>https://wheeloutstrategy.com/articles/</loc>
     <lastmod>2026-08-26</lastmod>
